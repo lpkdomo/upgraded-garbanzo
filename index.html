@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GOV-SF Cyber Incident Screen - Reimei Prop</title>
+<style>
+:root{
+  --green:#00ff99;
+  --cyan:#00d9ff;
+  --blue:#1b6cff;
+  --red:#ff2b2b;
+  --yellow:#ffd84d;
+  --bg:#02050a;
+  --panel:rgba(4,18,32,.84);
+  --line:rgba(0,217,255,.42);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(0,80,130,.35), transparent 45%),
+    radial-gradient(circle at 10% 90%, rgba(0,255,153,.12), transparent 30%),
+    #000;
+  color:var(--green);
+  font-family:Consolas, "Courier New", monospace;
+  height:100vh;
+  overflow:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(rgba(255,255,255,.03) 50%, rgba(0,0,0,.08) 50%),
+    linear-gradient(90deg, rgba(255,0,0,.02), rgba(0,255,255,.02));
+  background-size:100% 4px, 4px 100%;
+  mix-blend-mode:screen;
+  z-index:20;
+}
+body.glitch{
+  animation:shake .15s linear 5;
+  filter:contrast(1.45) brightness(.85) saturate(1.4);
+}
+@keyframes shake{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(5px,-3px)}
+  50%{transform:translate(-5px,3px)}
+  75%{transform:translate(3px,4px)}
+  100%{transform:translate(0,0)}
+}
+.topbar{
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(90deg, rgba(0,80,120,.7), rgba(0,0,0,.8));
+  box-shadow:0 0 25px rgba(0,217,255,.25);
+  letter-spacing:.08em;
+}
+.logo{
+  font-size:19px;
+  color:#d8fbff;
+  text-shadow:0 0 12px var(--cyan);
+}
+.logo span{color:var(--yellow)}
+.classified{
+  color:var(--red);
+  border:1px solid var(--red);
+  padding:6px 10px;
+  animation:pulseRed .8s infinite;
+}
+@keyframes pulseRed{50%{opacity:.35}}
+.clock{color:#e6ffff}
+.grid{
+  display:grid;
+  grid-template-columns: 320px 1fr 360px;
+  grid-template-rows: calc(100vh - 58px);
+}
+.side,.right,.center{
+  padding:12px;
+  overflow:hidden;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  margin-bottom:12px;
+  padding:10px;
+  box-shadow:inset 0 0 18px rgba(0,217,255,.08), 0 0 16px rgba(0,217,255,.08);
+  position:relative;
+}
+.panel::before{
+  content:"";
+  position:absolute;
+  left:0;top:0;
+  width:44px;height:2px;
+  background:var(--cyan);
+  box-shadow:0 0 10px var(--cyan);
+}
+.panel h3{
+  margin:0 0 8px;
+  color:#ecffff;
+  font-size:14px;
+  letter-spacing:.12em;
+}
+.bigRed{
+  color:var(--red);
+  font-size:24px;
+  font-weight:bold;
+  text-shadow:0 0 16px var(--red);
+}
+.bigYellow{
+  color:var(--yellow);
+  font-size:18px;
+  text-shadow:0 0 12px var(--yellow);
+}
+.kpi{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:6px;
+  font-size:13px;
+  line-height:1.45;
+}
+.value{color:#fff}
+.bar{
+  height:12px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.45);
+  margin:6px 0 10px;
+  overflow:hidden;
+}
+.fill{
+  height:100%;
+  width:30%;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+  box-shadow:0 0 12px var(--cyan);
+  transition:width .5s linear, background .3s;
+}
+.fill.red{background:linear-gradient(90deg,#ff6a00,var(--red));}
+.node{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px dashed rgba(0,217,255,.16);
+  padding:5px 0;
+  font-size:13px;
+}
+.ok{color:var(--green)}
+.warn{color:var(--yellow)}
+.fail{color:var(--red)}
+.center{
+  display:grid;
+  grid-template-rows: 1fr 220px;
+  gap:12px;
+}
+.mapPanel{
+  position:relative;
+  overflow:hidden;
+  min-height:0;
+}
+#space{
+  width:100%;
+  height:100%;
+  display:block;
+  background:radial-gradient(circle at center, rgba(0,217,255,.10), rgba(0,0,0,.85) 70%);
+}
+.crosshair{
+  position:absolute;
+  inset:50% auto auto 50%;
+  width:240px;height:240px;
+  transform:translate(-50%,-50%);
+  border:1px solid rgba(0,217,255,.35);
+  border-radius:50%;
+  box-shadow:0 0 40px rgba(0,217,255,.22);
+  pointer-events:none;
+  animation:spin 8s linear infinite;
+}
+.crosshair::before,.crosshair::after{
+  content:"";
+  position:absolute;
+  background:rgba(0,217,255,.45);
+}
+.crosshair::before{width:100%;height:1px;top:50%;left:0}
+.crosshair::after{height:100%;width:1px;left:50%;top:0}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.attackText{
+  position:absolute;
+  left:18px;
+  top:18px;
+  color:#fff;
+}
+.attackText .name{
+  margin-top:6px;
+  font-size:30px;
+  color:var(--red);
+  font-weight:bold;
+  text-shadow:0 0 18px var(--red);
+}
+.statusOverlay{
+  position:absolute;
+  right:18px;
+  bottom:18px;
+  text-align:right;
+  color:#fff;
+}
+.statusOverlay .percent{
+  font-size:48px;
+  color:var(--yellow);
+  text-shadow:0 0 18px var(--yellow);
+}
+.logPanel{
+  overflow:hidden;
+}
+#log{
+  height:165px;
+  overflow:hidden;
+  font-size:13px;
+  line-height:1.35;
+}
+.logLine{
+  white-space:nowrap;
+  border-bottom:1px solid rgba(0,217,255,.06);
+}
+.tag-info{color:var(--green)}
+.tag-warn{color:var(--yellow)}
+.tag-err{color:#ff6a6a}
+.tag-crit{color:var(--red);font-weight:bold}
+.alertBox{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.96);
+  min-width:620px;
+  max-width:86vw;
+  padding:24px;
+  background:rgba(10,0,0,.94);
+  border:2px solid var(--red);
+  color:#fff;
+  text-align:center;
+  z-index:50;
+  box-shadow:0 0 50px rgba(255,0,0,.55);
+  display:none;
+}
+.alertBox.show{display:block;animation:pop .25s ease-out}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.75);opacity:0}}
+.alertTitle{
+  font-size:36px;
+  color:var(--red);
+  text-shadow:0 0 20px var(--red);
+  margin-bottom:10px;
+}
+.matrix{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.13;
+  z-index:1;
+  background-image:
+    linear-gradient(90deg, rgba(0,255,153,.11) 1px, transparent 1px),
+    linear-gradient(rgba(0,255,153,.11) 1px, transparent 1px);
+  background-size:38px 38px;
+}
+.footerNotice{
+  position:fixed;
+  left:12px;
+  bottom:6px;
+  color:rgba(255,255,255,.42);
+  font-size:11px;
+  z-index:60;
+}
+.recoveryDone{
+  color:#fff;
+  font-size:22px;
+  line-height:1.6;
+}
+button{
+  background:rgba(0,217,255,.18);
+  color:#fff;
+  border:1px solid var(--cyan);
+  padding:8px 12px;
+  font-family:inherit;
+  cursor:pointer;
+}
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr;overflow:auto}
+  body{overflow:auto}
+  .center{grid-template-rows:420px 240px}
+  .side,.right{overflow:visible}
+}
+</style>
+</head>
+<body>
+<div class="matrix"></div>
+
+<div class="topbar">
+  <div class="logo">GOVERNMENT ORBITAL CYBER DEFENSE <span>// SF-PROP</span></div>
+  <div class="classified">LEVEL 7 INCIDENT</div>
+  <div class="clock" id="clock">00:00:00</div>
+</div>
+
+<div class="grid">
+  <div class="side">
+    <div class="panel">
+      <h3>THREAT ACTOR</h3>
+      <div class="bigRed">株式会社REIMEI</div>
+      <div class="bigYellow">ATTACK SOURCE IDENTIFIED</div>
+      <div style="margin-top:8px;color:#bff">※撮影用フィクション演出</div>
+    </div>
+
+    <div class="panel">
+      <h3>SYSTEM DAMAGE</h3>
+      <div class="kpi"><span>INTEGRITY</span><span class="value" id="integrityText">100%</span></div>
+      <div class="bar"><div class="fill" id="integrityBar" style="width:100%"></div></div>
+      <div class="kpi"><span>FIREWALL</span><span class="value" id="firewallText">ONLINE</span></div>
+      <div class="bar"><div class="fill" id="firewallBar" style="width:92%"></div></div>
+      <div class="kpi"><span>DATABASE</span><span class="value" id="dbText">STABLE</span></div>
+      <div class="bar"><div class="fill" id="dbBar" style="width:88%"></div></div>
+      <div class="kpi"><span>SATELLITE LINK</span><span class="value" id="satText">LOCKED</span></div>
+      <div class="bar"><div class="fill" id="satBar" style="width:76%"></div></div>
+    </div>
+
+    <div class="panel">
+      <h3>AGENCY NODES</h3>
+      <div id="nodes"></div>
+    </div>
+  </div>
+
+  <div class="center">
+    <div class="panel mapPanel">
+      <canvas id="space"></canvas>
+      <div class="crosshair"></div>
+      <div class="attackText">
+        <div>INCOMING SIGNAL TRACE</div>
+        <div class="name">REIMEI ATTACK WAVE</div>
+        <div id="wave">WAVE 01 // PROBING DEFENSE GRID</div>
+      </div>
+      <div class="statusOverlay">
+        <div>GLOBAL DEFENSE GRID DAMAGE</div>
+        <div class="percent" id="damagePercent">0%</div>
+        <div id="mainStatus">MONITORING ORBITAL NETWORK...</div>
+      </div>
+    </div>
+
+    <div class="panel logPanel">
+      <h3>LIVE INCIDENT LOG</h3>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="panel">
+      <h3>COUNTERMEASURE</h3>
+      <div class="kpi"><span>RECOVERY</span><span class="value" id="recoveryText">0%</span></div>
+      <div class="bar"><div class="fill" id="recoveryBar" style="width:0%"></div></div>
+      <div id="recoveryMessage">AWAITING EMERGENCY AUTHORIZATION...</div>
+    </div>
+
+    <div class="panel">
+      <h3>TACTICAL STATUS</h3>
+      <div id="tactical">
+        MODE: SURVEILLANCE<br>
+        DEFCON-SF: 4<br>
+        LOCKDOWN: STANDBY<br>
+        BACKUP GRID: ARMED
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>REIMEI SIGNAL</h3>
+      SOURCE NAME: 株式会社REIMEI<br>
+      SIGNAL TYPE: CINEMATIC PROP<br>
+      ROUTE: FICTIONAL ORBITAL RELAY<br>
+      INTENT: SCREEN EFFECT ONLY<br><br>
+      <button onclick="restartShow()">RESTART SCENE</button>
+    </div>
+  </div>
+</div>
+
+<div class="alertBox" id="alertBox">
+  <div class="alertTitle" id="alertTitle">CRITICAL ALERT</div>
+  <div id="alertBody">Incoming attack wave detected.</div>
+</div>
+
+<div class="footerNotice">
+  SAFE PROP DEMO: 実際の通信・攻撃・感染・情報取得・削除は行いません。
+</div>
+
+<script>
+const logEl = document.getElementById("log");
+const nodesEl = document.getElementById("nodes");
+const nodeNames = ["NODE-01 TOKYO","NODE-02 OSAKA","NODE-03 ORBITAL","NODE-04 DEFENSE","NODE-05 ARCHIVE","NODE-06 BACKUP","NODE-07 SAT-COM","NODE-08 AI CORE"];
+let integrity = 100;
+let firewall = 92;
+let database = 88;
+let satellite = 76;
+let damage = 0;
+let recovery = 0;
+let phase = 0;
+let running = true;
+
+function initNodes(){
+  nodesEl.innerHTML = "";
+  nodeNames.forEach((name,i)=>{
+    const div = document.createElement("div");
+    div.className = "node";
+    div.id = "node"+i;
+    div.innerHTML = `<span>${name}</span><span class="ok">ONLINE</span>`;
+    nodesEl.appendChild(div);
+  });
+}
+initNodes();
+
+function setNode(index,status,cls){
+  const node = document.getElementById("node"+index);
+  if(node) node.innerHTML = `<span>${nodeNames[index]}</span><span class="${cls}">${status}</span>`;
+}
+
+function addLog(level,msg){
+  const line = document.createElement("div");
+  const tagClass = level==="INFO" ? "tag-info" : level==="WARN" ? "tag-warn" : level==="ERROR" ? "tag-err" : "tag-crit";
+  line.className = "logLine";
+  line.innerHTML = `<span class="${tagClass}">[${level}]</span> ${new Date().toLocaleTimeString()} ${msg}`;
+  logEl.prepend(line);
+}
+
+function updateBars(){
+  document.getElementById("integrityText").innerText = Math.max(0,Math.floor(integrity))+"%";
+  document.getElementById("integrityBar").style.width = Math.max(0,integrity)+"%";
+  document.getElementById("firewallBar").style.width = Math.max(0,firewall)+"%";
+  document.getElementById("dbBar").style.width = Math.max(0,database)+"%";
+  document.getElementById("satBar").style.width = Math.max(0,satellite)+"%";
+  document.getElementById("damagePercent").innerText = Math.min(100,Math.floor(damage))+"%";
+
+  if(integrity < 45) document.getElementById("integrityBar").classList.add("red");
+  if(firewall < 55) document.getElementById("firewallBar").classList.add("red");
+  if(database < 50) document.getElementById("dbBar").classList.add("red");
+  if(satellite < 45) document.getElementById("satBar").classList.add("red");
+
+  document.getElementById("firewallText").innerText = firewall < 20 ? "FAILED" : firewall < 55 ? "DAMAGED" : "ONLINE";
+  document.getElementById("dbText").innerText = database < 20 ? "CRASHED" : database < 50 ? "UNSTABLE" : "STABLE";
+  document.getElementById("satText").innerText = satellite < 20 ? "LOST" : satellite < 45 ? "WEAK" : "LOCKED";
+}
+
+function showAlert(title,body){
+  const box = document.getElementById("alertBox");
+  document.getElementById("alertTitle").innerText = title;
+  document.getElementById("alertBody").innerHTML = body;
+  box.classList.add("show");
+  document.body.classList.add("glitch");
+  setTimeout(()=>box.classList.remove("show"),2300);
+  setTimeout(()=>document.body.classList.remove("glitch"),900);
+}
+
+function tickClock(){
+  document.getElementById("clock").innerText = new Date().toLocaleTimeString();
+}
+setInterval(tickClock,1000);
+tickClock();
+
+const normalLogs = [
+  "Orbital defense grid synchronized",
+  "Quantum relay heartbeat received",
+  "Scanning encrypted signal fragments",
+  "Monitoring agency backbone traffic",
+  "Satellite telemetry packet verified",
+  "AI anomaly model recalibrated"
+];
+
+const attackLogs = [
+  "株式会社REIMEI signature detected in inbound signal",
+  "Unauthorized packet storm impacting orbital relay",
+  "Defense grid absorbing synthetic attack wave",
+  "Firewall layer damaged by repeated burst traffic",
+  "Database mirror experiencing cinematic corruption",
+  "Satellite command channel suffering signal noise",
+  "Primary cluster response time exceeded threshold",
+  "Emergency firewall rules deployed"
+];
+
+const criticalLogs = [
+  "PRIMARY DEFENSE GRID TAKING DAMAGE",
+  "NODE-03 ORBITAL LINK UNSTABLE",
+  "DATABASE FAILOVER DID NOT RESPOND",
+  "SATELLITE RELAY SIGNAL COLLAPSE",
+  "FIREWALL MATRIX COMPROMISED",
+  "SYSTEM INTEGRITY CRITICAL"
+];
+
+function mainLoop(){
+  if(!running) return;
+
+  if(phase === 0){
+    addLog("INFO", normalLogs[Math.floor(Math.random()*normalLogs.length)]);
+  }
+
+  if(phase >= 1 && phase < 4){
+    damage += Math.random()*3 + 1.2;
+    integrity -= Math.random()*2.7 + 1;
+    firewall -= Math.random()*2.3 + .8;
+    database -= Math.random()*2 + .5;
+    satellite -= Math.random()*2.2 + .4;
+
+    const level = Math.random() < .28 ? "ERROR" : "WARN";
+    addLog(level, attackLogs[Math.floor(Math.random()*attackLogs.length)]);
+  }
+
+  if(phase >= 3 && phase < 4){
+    addLog("CRITICAL", criticalLogs[Math.floor(Math.random()*criticalLogs.length)]);
+    document.getElementById("mainStatus").innerText = "EMERGENCY DAMAGE CONTROL ACTIVE";
+  }
+
+  updateBars();
+}
+
+setInterval(mainLoop,900);
+
+function sequence(){
+  setTimeout(()=>{
+    phase = 1;
+    document.getElementById("wave").innerText = "WAVE 01 // 株式会社REIMEI PROBING GOVERNMENT GRID";
+    document.getElementById("mainStatus").innerText = "ATTACK SOURCE IDENTIFIED: 株式会社REIMEI";
+    showAlert("SIGNAL DETECTED","攻撃元表示: <b>株式会社REIMEI</b><br>政府機関/SF映画風の撮影用演出です。");
+    addLog("WARN","Unknown cinematic threat actor labeled: 株式会社REIMEI");
+    setNode(2,"DEGRADED","warn");
+  },3500);
+
+  setTimeout(()=>{
+    phase = 2;
+    document.getElementById("wave").innerText = "WAVE 02 // DEFENSE GRID IMPACT";
+    showAlert("DEFENSE GRID HIT","Firewall matrix damage increasing.<br>Emergency shield not responding.");
+    setNode(3,"UNDER ATTACK","fail");
+    setNode(6,"SIGNAL WEAK","warn");
+  },10000);
+
+  setTimeout(()=>{
+    phase = 3;
+    document.getElementById("wave").innerText = "WAVE 03 // CRITICAL SYSTEM DAMAGE";
+    showAlert("CRITICAL DAMAGE","SYSTEM INTEGRITY FALLING<br>Primary cluster is taking heavy damage.");
+    setNode(4,"OFFLINE","fail");
+    setNode(5,"FAILOVER","warn");
+    document.getElementById("tactical").innerHTML =
+      "MODE: EMERGENCY<br>DEFCON-SF: 1<br>LOCKDOWN: ACTIVE<br>BACKUP GRID: DAMAGED";
+  },17500);
+
+  setTimeout(()=>{
+    phase = 4;
+    showAlert("COUNTERMEASURE AUTHORIZED","Initiating emergency recovery protocol.<br>Reimei signal containment starting.");
+    document.getElementById("wave").innerText = "COUNTERMEASURE // CONTAINING REIMEI SIGNAL";
+    document.getElementById("recoveryMessage").innerText = "RECOVERY PROTOCOL RUNNING...";
+    addLog("INFO","Emergency countermeasure authorized");
+    addLog("INFO","Reimei signal containment sequence initiated");
+  },27500);
+
+  const recTimer = setInterval(()=>{
+    if(phase !== 4) return;
+    recovery += Math.random()*5 + 2;
+    integrity += Math.random()*2.5 + 1.2;
+    firewall += Math.random()*2.2 + 1;
+    database += Math.random()*2 + 1;
+    satellite += Math.random()*2 + 1;
+    damage -= Math.random()*3 + 1;
+
+    recovery = Math.min(100,recovery);
+    integrity = Math.min(100,integrity);
+    firewall = Math.min(100,firewall);
+    database = Math.min(100,database);
+    satellite = Math.min(100,satellite);
+    damage = Math.max(0,damage);
+
+    document.getElementById("recoveryBar").style.width = recovery+"%";
+    document.getElementById("recoveryText").innerText = Math.floor(recovery)+"%";
+    document.getElementById("mainStatus").innerText = "RECOVERY IN PROGRESS...";
+    document.getElementById("recoveryMessage").innerText = "RESTORING GRID // " + Math.floor(recovery) + "%";
+
+    if(Math.random()<.45) addLog("INFO","Recovering damaged service block");
+
+    updateBars();
+
+    if(recovery >= 100){
+      clearInterval(recTimer);
+      running = false;
+      phase = 5;
+      integrity = 100; firewall = 100; database = 100; satellite = 100; damage = 0;
+      updateBars();
+      document.getElementById("recoveryMessage").innerHTML =
+        "<div class='recoveryDone'>SYSTEM RESTORED<br>REIMEI SIGNAL CONTAINED<br>GOV-SF GRID ONLINE</div>";
+      document.getElementById("mainStatus").innerText = "ALL SERVICES RESTORED";
+      document.getElementById("wave").innerText = "INCIDENT CLOSED // 株式会社REIMEI SIGNAL CONTAINED";
+      document.getElementById("tactical").innerHTML =
+        "MODE: RECOVERED<br>DEFCON-SF: 4<br>LOCKDOWN: RELEASED<br>BACKUP GRID: ONLINE";
+      nodeNames.forEach((_,i)=>setNode(i,"ONLINE","ok"));
+      addLog("INFO","SYSTEM RESTORED // All services online");
+      showAlert("SYSTEM RECOVERED","株式会社REIMEI の攻撃演出を封じ込めました。<br><b>撮影用デモ完了</b>");
+    }
+  },700);
+}
+sequence();
+
+function restartShow(){
+  location.reload();
+}
+
+/* SF radar / orbital animation */
+const canvas = document.getElementById("space");
+const ctx = canvas.getContext("2d");
+let w,h,particles=[];
+function resize(){
+  const rect = canvas.getBoundingClientRect();
+  w = canvas.width = Math.floor(rect.width * devicePixelRatio);
+  h = canvas.height = Math.floor(rect.height * devicePixelRatio);
+  particles = Array.from({length:90},()=>({
+    x:Math.random()*w,
+    y:Math.random()*h,
+    r:Math.random()*2+0.6,
+    s:Math.random()*0.7+0.2,
+    a:Math.random()*Math.PI*2
+  }));
+}
+window.addEventListener("resize",resize);
+resize();
+
+function draw(){
+  ctx.clearRect(0,0,w,h);
+
+  ctx.strokeStyle = "rgba(0,217,255,.16)";
+  ctx.lineWidth = 1;
+  for(let i=0;i<9;i++){
+    const y = h/10*i + h/10;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+  }
+  for(let i=0;i<12;i++){
+    const x = w/12*i;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+  }
+
+  const cx=w/2, cy=h/2;
+  ctx.strokeStyle = "rgba(0,217,255,.45)";
+  for(let r=80*devicePixelRatio; r<Math.min(w,h)/2; r+=55*devicePixelRatio){
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  }
+
+  particles.forEach(p=>{
+    p.x += Math.cos(p.a)*p.s*devicePixelRatio;
+    p.y += Math.sin(p.a)*p.s*devicePixelRatio;
+    if(p.x<0||p.x>w||p.y<0||p.y>h){p.x=Math.random()*w;p.y=Math.random()*h;}
+    ctx.fillStyle = "rgba(0,255,153,.8)";
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.r*devicePixelRatio,0,Math.PI*2); ctx.fill();
+  });
+
+  const beams = Math.min(12, Math.floor(damage/8)+1);
+  for(let i=0;i<beams;i++){
+    const ang = (Date.now()/600 + i*(Math.PI*2/beams));
+    const x = cx + Math.cos(ang)*Math.min(w,h)*.38;
+    const y = cy + Math.sin(ang)*Math.min(w,h)*.28;
+    ctx.strokeStyle = phase>=3 ? "rgba(255,43,43,.75)" : "rgba(255,216,77,.55)";
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(cx,cy); ctx.stroke();
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+addLog("INFO","Government orbital cyber defense dashboard booted");
+addLog("INFO","Safe cinematic prop mode enabled");
+</script>
+</body>
+</html>
