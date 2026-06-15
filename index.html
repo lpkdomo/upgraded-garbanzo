@@ -283,6 +283,97 @@ button{
   font-family:inherit;
   cursor:pointer;
 }
+
+.reimeiMega{
+  position:fixed;
+  top:72px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:25;
+  font-size:58px;
+  font-weight:900;
+  letter-spacing:.18em;
+  color:rgba(255,43,43,.92);
+  text-shadow:
+    0 0 10px var(--red),
+    0 0 28px var(--red),
+    0 0 60px rgba(255,43,43,.65);
+  pointer-events:none;
+  animation:reimeiPulse .55s infinite;
+  white-space:nowrap;
+}
+@keyframes reimeiPulse{
+  0%,100%{opacity:1;filter:brightness(1)}
+  50%{opacity:.45;filter:brightness(1.8)}
+}
+.reimeiWatermark{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(4,1fr);
+  opacity:.055;
+  transform:rotate(-18deg) scale(1.08);
+}
+.reimeiWatermark div{
+  color:#ff2b2b;
+  font-size:54px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-shadow:0 0 20px #ff2b2b;
+}
+.reimeiBadge{
+  display:inline-block;
+  margin-top:8px;
+  padding:8px 12px;
+  border:2px solid var(--red);
+  color:#fff;
+  background:rgba(255,0,0,.22);
+  font-size:20px;
+  font-weight:900;
+  text-shadow:0 0 14px var(--red);
+  animation:pulseRed .45s infinite;
+}
+.reimeiNameStrong{
+  color:var(--red);
+  font-weight:900;
+  font-size:42px;
+  letter-spacing:.08em;
+  text-shadow:
+    0 0 14px var(--red),
+    0 0 32px var(--red);
+}
+.reimeiTicker{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:24px;
+  z-index:55;
+  background:rgba(120,0,0,.72);
+  border-top:1px solid var(--red);
+  border-bottom:1px solid var(--red);
+  color:#fff;
+  overflow:hidden;
+  white-space:nowrap;
+  height:30px;
+  display:flex;
+  align-items:center;
+}
+.reimeiTicker span{
+  display:inline-block;
+  padding-left:100%;
+  animation:ticker 18s linear infinite;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+@keyframes ticker{
+  from{transform:translateX(0)}
+  to{transform:translateX(-100%)}
+}
 @media(max-width:900px){
   .grid{grid-template-columns:1fr;overflow:auto}
   body{overflow:auto}
@@ -292,7 +383,14 @@ button{
 </style>
 </head>
 <body>
+<div class="reimeiWatermark">
+  <div>REIMEI</div><div>REIMEI</div><div>REIMEI</div>
+  <div>株式会社REIMEI</div><div>株式会社REIMEI</div><div>株式会社REIMEI</div>
+  <div>REIMEI ATTACK</div><div>REIMEI ATTACK</div><div>REIMEI ATTACK</div>
+  <div>REIMEI</div><div>REIMEI</div><div>REIMEI</div>
+</div>
 <div class="matrix"></div>
+<div class="reimeiMega">株式会社REIMEI ATTACKING</div>
 
 <div class="topbar">
   <div class="logo">GOVERNMENT ORBITAL CYBER DEFENSE <span>// SF-PROP</span></div>
@@ -304,9 +402,10 @@ button{
   <div class="side">
     <div class="panel">
       <h3>THREAT ACTOR</h3>
-      <div class="bigRed">株式会社REIMEI</div>
+      <div class="reimeiNameStrong">株式会社REIMEI</div>
+      <div class="reimeiBadge">MAIN ATTACKER DETECTED</div>
       <div class="bigYellow">ATTACK SOURCE IDENTIFIED</div>
-      <div style="margin-top:8px;color:#bff">※撮影用フィクション演出</div>
+      
     </div>
 
     <div class="panel">
@@ -333,7 +432,7 @@ button{
       <div class="crosshair"></div>
       <div class="attackText">
         <div>INCOMING SIGNAL TRACE</div>
-        <div class="name">REIMEI ATTACK WAVE</div>
+        <div class="name" style="font-size:44px;">株式会社REIMEI ATTACK WAVE</div>
         <div id="wave">WAVE 01 // PROBING DEFENSE GRID</div>
       </div>
       <div class="statusOverlay">
@@ -369,10 +468,13 @@ button{
 
     <div class="panel">
       <h3>REIMEI SIGNAL</h3>
+      <div class="reimeiNameStrong" style="font-size:28px;">株式会社REIMEI</div>
+      <div class="reimeiBadge">SIGNAL DOMINANCE: HIGH</div><br>
       SOURCE NAME: 株式会社REIMEI<br>
       SIGNAL TYPE: CINEMATIC PROP<br>
       ROUTE: FICTIONAL ORBITAL RELAY<br>
-      INTENT: SCREEN EFFECT ONLY<br><br>
+      INTENT: SCREEN EFFECT ONLY<br>
+      WARNING: REIMEI WAVE ACTIVE<br><br>
       <button onclick="restartShow()">RESTART SCENE</button>
     </div>
   </div>
@@ -381,6 +483,10 @@ button{
 <div class="alertBox" id="alertBox">
   <div class="alertTitle" id="alertTitle">CRITICAL ALERT</div>
   <div id="alertBody">Incoming attack wave detected.</div>
+</div>
+
+<div class="reimeiTicker">
+  <span>⚠ 株式会社REIMEI ATTACK WAVE DETECTED // REIMEI SIGNAL ACTIVE // REIMEI OVERRIDE ATTEMPT // GOVERNMENT GRID UNDER CINEMATIC PROP ATTACK ⚠</span>
 </div>
 
 <div class="footerNotice">
@@ -480,11 +586,13 @@ const attackLogs = [
 ];
 
 const criticalLogs = [
-  "PRIMARY DEFENSE GRID TAKING DAMAGE",
+  "株式会社REIMEI ATTACK WAVE CAUSING CRITICAL DAMAGE",
+  "REIMEI OVERRIDE ATTEMPT DETECTED",
+  "PRIMARY DEFENSE GRID TAKING DAMAGE FROM REIMEI SIGNAL",
   "NODE-03 ORBITAL LINK UNSTABLE",
   "DATABASE FAILOVER DID NOT RESPOND",
   "SATELLITE RELAY SIGNAL COLLAPSE",
-  "FIREWALL MATRIX COMPROMISED",
+  "FIREWALL MATRIX COMPROMISED BY REIMEI WAVE",
   "SYSTEM INTEGRITY CRITICAL"
 ];
 
@@ -521,7 +629,7 @@ function sequence(){
     phase = 1;
     document.getElementById("wave").innerText = "WAVE 01 // 株式会社REIMEI PROBING GOVERNMENT GRID";
     document.getElementById("mainStatus").innerText = "ATTACK SOURCE IDENTIFIED: 株式会社REIMEI";
-    showAlert("SIGNAL DETECTED","攻撃元表示: <b>株式会社REIMEI</b><br>政府機関/SF映画風の撮影用演出です。");
+    showAlert("株式会社REIMEI DETECTED","<span style='font-size:34px;color:#ff2b2b;font-weight:900;text-shadow:0 0 18px #ff2b2b;'>株式会社REIMEI</span><br>攻撃波を検出<br>政府機関/SF映画風の撮影用演出です。");
     addLog("WARN","Unknown cinematic threat actor labeled: 株式会社REIMEI");
     setNode(2,"DEGRADED","warn");
   },3500);
@@ -529,7 +637,7 @@ function sequence(){
   setTimeout(()=>{
     phase = 2;
     document.getElementById("wave").innerText = "WAVE 02 // DEFENSE GRID IMPACT";
-    showAlert("DEFENSE GRID HIT","Firewall matrix damage increasing.<br>Emergency shield not responding.");
+    showAlert("REIMEI ATTACK IMPACT","<span style='font-size:32px;color:#ff2b2b;font-weight:900;'>株式会社REIMEI</span><br>Firewall matrix damage increasing.<br>Emergency shield not responding.");
     setNode(3,"UNDER ATTACK","fail");
     setNode(6,"SIGNAL WEAK","warn");
   },10000);
@@ -537,7 +645,7 @@ function sequence(){
   setTimeout(()=>{
     phase = 3;
     document.getElementById("wave").innerText = "WAVE 03 // CRITICAL SYSTEM DAMAGE";
-    showAlert("CRITICAL DAMAGE","SYSTEM INTEGRITY FALLING<br>Primary cluster is taking heavy damage.");
+    showAlert("REIMEI CRITICAL DAMAGE","<span style='font-size:32px;color:#ff2b2b;font-weight:900;'>株式会社REIMEI 攻撃継続中</span><br>SYSTEM INTEGRITY FALLING<br>Primary cluster is taking heavy damage.");
     setNode(4,"OFFLINE","fail");
     setNode(5,"FAILOVER","warn");
     document.getElementById("tactical").innerHTML =
@@ -546,7 +654,7 @@ function sequence(){
 
   setTimeout(()=>{
     phase = 4;
-    showAlert("COUNTERMEASURE AUTHORIZED","Initiating emergency recovery protocol.<br>Reimei signal containment starting.");
+    showAlert("ANTI-REIMEI COUNTERMEASURE","Initiating emergency recovery protocol.<br><span style='font-size:30px;color:#ff2b2b;font-weight:900;'>株式会社REIMEI SIGNAL CONTAINMENT</span> starting.");
     document.getElementById("wave").innerText = "COUNTERMEASURE // CONTAINING REIMEI SIGNAL";
     document.getElementById("recoveryMessage").innerText = "RECOVERY PROTOCOL RUNNING...";
     addLog("INFO","Emergency countermeasure authorized");
@@ -592,7 +700,7 @@ function sequence(){
         "MODE: RECOVERED<br>DEFCON-SF: 4<br>LOCKDOWN: RELEASED<br>BACKUP GRID: ONLINE";
       nodeNames.forEach((_,i)=>setNode(i,"ONLINE","ok"));
       addLog("INFO","SYSTEM RESTORED // All services online");
-      showAlert("SYSTEM RECOVERED","株式会社REIMEI の攻撃演出を封じ込めました。<br><b>撮影用デモ完了</b>");
+      showAlert("SYSTEM RECOVERED","<span style='font-size:32px;color:#ff2b2b;font-weight:900;'>株式会社REIMEI</span><br>攻撃演出を封じ込めました。<br><b>撮影用デモ完了</b>");
     }
   },700);
 }
